@@ -9,6 +9,9 @@ import puppeteer from "puppeteer";
     });
     const page = await browser.newPage();
     await page.goto("https://www.google.com/maps");
+    await page.setUserAgent(
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36"
+    );
 
     // Search for the place
     const inputSearch = await page.waitForSelector("input[name=q]");
@@ -119,23 +122,35 @@ import puppeteer from "puppeteer";
               ?.textContent?.split(" · ") || "";
 
           const reviewerBussinessRating =
-            review
-              .querySelector("span[class*='kvMYJc'][role][aria-label]")
-              ?.getAttribute("aria-label")
-              ?.split(",")[0] || "";
+            review.querySelector("div[class*='DU9Pgb'] > span.fzvQIb")
+              ?.textContent || "";
 
-          // const imageUrls = Array.from(imageElements).map((el) => {
-          //   const style = el.getAttribute("style");
-          //   const urlMatch = style.match(/url\("(.+?)"\)/);
-          //   return urlMatch ? urlMatch[1] : "";
-          // });
+          const reviewerPublishedReview =
+            review.querySelector(
+              "div[class*='DU9Pgb'] > span.fzvQIb + span.xRkPPb"
+            )?.textContent || "";
+
+          const reviewerPublisherProviderLogo =
+            review
+              .querySelector(
+                "div[class*='DU9Pgb'] > span.fzvQIb + span.xRkPPb > span > img"
+              )
+              ?.getAttribute("src") || "";
+
+          const reviewerComment =
+            review.querySelector(
+              "div[class*='DU9Pgb'] + div > div > span.wiI7pd"
+            )?.textContent || "";
 
           return {
-            reviewerAvatar,
+            reviewerAvatar: reviewerAvatar.replace(/w36-h36.*/, "w300-h300"),
             reviewerProfileLink,
             reviewerName,
             reviewerActivityStat,
             reviewerBussinessRating,
+            reviewerPublishedReview,
+            reviewerPublisherProviderLogo,
+            reviewerComment,
           };
         })
     );
